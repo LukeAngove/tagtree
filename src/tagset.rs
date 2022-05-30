@@ -15,8 +15,6 @@ impl FromStr for TagSet {
 
 impl<'a> FileQuery for TagSet {
     fn could_match(&self, to_match: &File) -> bool {
-        println!("Checking file (tags): {:?}", to_match);
-        println!("Against: {:?}", self);
         to_match.has_tags(self)
     }
 

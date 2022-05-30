@@ -1,6 +1,8 @@
 use criterion::{black_box, criterion_group, criterion_main, Criterion};
 use rdb_fs::fromstr::FromStr;
-use rdb_fs::{File, FileDB, FileQuery, HashTags2DBFS, HashTagsDBFS, NaiveDBFS, TagSet};
+use rdb_fs::{
+    File, FileDB, FileQuery, HashTags2DBFS, HashTagsDBFS, NaiveDBFS, TagSet, TagTreeDBFS,
+};
 use std::collections::hash_set::HashSet;
 
 fn file_list_from_iter_str<'a, I>(items: I) -> HashSet<File>
@@ -81,6 +83,10 @@ pub fn criterion_benchmark_add(c: &mut Criterion) {
             )
         })
     });
+
+    c.bench_function("tagtree_add_files", |b| {
+        b.iter(|| add_files_to_db(black_box(&mut TagTreeDBFS::new()), black_box(files.clone())))
+    });
 }
 
 pub fn criterion_benchmark_search(c: &mut Criterion) {
@@ -99,6 +105,9 @@ pub fn criterion_benchmark_search(c: &mut Criterion) {
     let mut hashtags2 = HashTags2DBFS::new();
     add_files_to_db(&mut hashtags2, files.clone());
 
+    let mut tagtree = TagTreeDBFS::new();
+    add_files_to_db(&mut tagtree, files.clone());
+
     let queries = query_list_from_iter_str(["/fine/etc/shoes", "/mnt/patition"]);
 
     c.bench_function("naive_get_files", |b| {
@@ -111,6 +120,10 @@ pub fn criterion_benchmark_search(c: &mut Criterion) {
 
     c.bench_function("hashtags_get_files", |b| {
         b.iter(|| query_files_in_db(black_box(&hashtags2), black_box(queries.clone())))
+    });
+
+    c.bench_function("tagtree_get_files", |b| {
+        b.iter(|| query_files_in_db(black_box(&tagtree), black_box(queries.clone())))
     });
 }
 

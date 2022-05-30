@@ -42,9 +42,6 @@ impl FromStr for File {
 
 impl FileQuery for File {
     fn could_match(&self, to_match: &File) -> bool {
-        println!("Checking file: {:?}", to_match);
-        println!("could_match: {:?}", self.tags.could_match(to_match));
-        println!("name: {:?}", self.name == to_match.name);
         self.tags.could_match(to_match) && self.name == to_match.name
     }
 

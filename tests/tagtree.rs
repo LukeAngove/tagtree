@@ -1,17 +1,15 @@
 mod helpers;
 
 use crate::helpers::{add_files_to_db, file_list_from_iter_str};
-use rdb_fs::File;
-use rdb_fs::FileDB;
-use rdb_fs::FileQuery;
-use rdb_fs::GetFileError;
-use rdb_fs::TagTreeDBFS;
-use rdb_fs::TagSet;
 use rdb_fs::fromstr::FromStr;
+use rdb_fs::GetFileError;
+use rdb_fs::TagSet;
+use rdb_fs::TagTreeDBFS;
+use rdb_fs::{File, FileDB, FileQuery};
 use std::collections::hash_set::HashSet;
 
 #[test]
-fn dbfs_should_find_files() {
+fn tagtree_should_find_files() {
     let mut db = TagTreeDBFS::new();
 
     let files = file_list_from_iter_str([
@@ -33,7 +31,7 @@ fn dbfs_should_find_files() {
 }
 
 #[test]
-fn dbfs_should_find_files_with_different_query_order() {
+fn tagtree_should_find_files_with_different_query_order() {
     let mut db = TagTreeDBFS::new();
     let files = file_list_from_iter_str([
         "/etc/fine/shoes/make.txt",
@@ -56,7 +54,7 @@ fn dbfs_should_find_files_with_different_query_order() {
 }
 
 #[test]
-fn dbfs_should_get_empty_list_for_file_that_doesnt_exist() {
+fn tagtree_should_get_empty_list_for_file_that_doesnt_exist() {
     let mut db = TagTreeDBFS::new();
     let files = file_list_from_iter_str([
         "/etc/fine/shoes/make.txt",
@@ -76,7 +74,7 @@ fn dbfs_should_get_empty_list_for_file_that_doesnt_exist() {
 }
 
 #[test]
-fn dbfs_should_get_file_for_file_that_exists() {
+fn tagtree_should_get_file_for_file_that_exists() {
     let mut db = TagTreeDBFS::new();
     let files = file_list_from_iter_str(["/etc/fine/shoes/make.txt"]);
 
@@ -92,7 +90,7 @@ fn dbfs_should_get_file_for_file_that_exists() {
 }
 
 #[test]
-fn dbfs_should_get_file_with_more_tags_for_file_that_exists() {
+fn tagtree_should_get_file_with_more_tags_for_file_that_exists() {
     let mut db = TagTreeDBFS::new();
     let files = file_list_from_iter_str(["/etc/fine/shoes/make.txt"]);
 
@@ -109,7 +107,7 @@ fn dbfs_should_get_file_with_more_tags_for_file_that_exists() {
 }
 
 #[test]
-fn dbfs_should_get_no_such_file_for_file_that_doesnt_exist() {
+fn tagtree_should_get_no_such_file_for_file_that_doesnt_exist() {
     let mut db = TagTreeDBFS::new();
     let files = file_list_from_iter_str([
         "/etc/fine/shoes/make.txt",
@@ -127,7 +125,7 @@ fn dbfs_should_get_no_such_file_for_file_that_doesnt_exist() {
 }
 
 #[test]
-fn dbfs_should_get_too_many_files_for_query_with_multiple_matches() {
+fn tagtree_should_get_too_many_files_for_query_with_multiple_matches() {
     let mut db = TagTreeDBFS::new();
     let files = file_list_from_iter_str(["/etc/fine/shoes/make.txt", "/etc/fine/extra/make.txt"]);
 
