@@ -5,11 +5,6 @@ use super::Node;
 use crate::{fdb_trait::GetFileError, File, FileDB, FileQuery};
 use std::collections::hash_map::HashMap;
 
-#[derive(Debug)]
-struct TagMask {
-    pub contains: TagMaskBits,
-}
-
 type TagMasks = HashMap<String, TagMaskBits>;
 
 #[derive(Debug)]

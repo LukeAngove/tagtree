@@ -6,10 +6,6 @@ impl TagMaskBits {
     pub const MAX: TagMaskBits = Self(u32::MAX);
     pub const CLEAR: TagMaskBits = Self(0);
 
-    pub fn new(val: u32) -> Self {
-        Self(val)
-    }
-
     // idx zero is the smallest value bit.
     pub fn unset_bit(&mut self, idx: usize) {
         assert!(idx < Self::BITS);
