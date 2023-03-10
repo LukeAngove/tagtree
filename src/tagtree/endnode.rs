@@ -2,7 +2,7 @@ use super::endnodeiterator::EndNodeIterator;
 use crate::{fdb_trait::GetFileError, File, FileDB, FileQuery, TagSet};
 use std::collections::btree_set::BTreeSet;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct EndNode {
     file_names: BTreeSet<String>,
     tags: TagSet,
@@ -14,6 +14,10 @@ impl EndNode {
             file_names: BTreeSet::new(),
             tags,
         }
+    }
+
+    pub(crate) fn all_tags(&self) -> TagSet {
+        self.tags.clone()
     }
 }
 
@@ -33,11 +37,7 @@ impl FileDB for EndNode {
         if self.tags.is_superset(query.tags()) {
             if let Some(file_name) = query.name() {
                 if self.file_names.contains(file_name) {
-                    EndNodeIterator::new(
-                        [file_name.to_string()]
-                            .iter(),
-                        &self.tags,
-                    )
+                    EndNodeIterator::new([file_name.to_string()].iter(), &self.tags)
                 } else {
                     EndNodeIterator::empty()
                 }

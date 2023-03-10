@@ -11,7 +11,7 @@ use endnode::EndNode;
 use multiendnodeiterator::MultiNodeIterator;
 use nodeiterator::NodeIterator;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum Node {
     Branch(BranchNode),
     End(EndNode),
@@ -46,6 +46,7 @@ impl FileDB for Node {
     }
 }
 
+#[derive(Debug)]
 pub struct TagTreeDBFS {
     root: Node,
 }
@@ -56,13 +57,27 @@ impl TagTreeDBFS {
             root: Node::Branch(BranchNode::new()),
         }
     }
+
+    fn replace_node(&mut self) {
+        // It is safe to pass None here, because we know that the our node is
+        // always a Branch (in fact, we should replace this just with split).
+        let replacement = BranchNode::make_replacement_node(&self.root, None);
+
+        // This should be made atomic.
+        self.root = replacement;
+    }
 }
 
 impl FileDB for TagTreeDBFS {
     type FileIterator = NodeIterator;
 
     fn add_file(&mut self, new_file: &File) -> Option<()> {
-        self.root.add_file(new_file)
+        if let Some(res) = self.root.add_file(new_file) {
+            return Some(res);
+        } else {
+            self.replace_node();
+            return self.root.add_file(new_file);
+        }
     }
 
     fn get_files<F: FileQuery>(&self, query: &F) -> Self::FileIterator {

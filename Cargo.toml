@@ -9,6 +9,9 @@ edition = "2021"
 
 [dev-dependencies]
 criterion = "0.3"
+serde = "1.0"
+serde_yaml = "0.8"
+proptest = "1.0.0"
 
 [[bench]]
 name = "naive"

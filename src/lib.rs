@@ -1,3 +1,6 @@
+#[cfg(test)]
+extern crate proptest;
+
 mod fdb_trait;
 mod file;
 mod filequery;

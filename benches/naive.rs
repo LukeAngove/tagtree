@@ -3,15 +3,22 @@ use rdb_fs::fromstr::FromStr;
 use rdb_fs::{
     File, FileDB, FileQuery, HashTags2DBFS, HashTagsDBFS, NaiveDBFS, TagSet, TagTreeDBFS,
 };
+use std::fs::File as OSFile;
+use serde_yaml::from_reader;
 use std::collections::hash_set::HashSet;
 
-fn file_list_from_iter_str<'a, I>(items: I) -> HashSet<File>
-where
-    I: IntoIterator<Item = &'a str>,
+pub fn load_file_names(file_name: &str) -> Result<Vec<String>, Box<dyn std::error::Error>> {
+    let file = OSFile::open(file_name)?;
+    let conf: Vec<String> = from_reader(file)?;
+    Ok(conf)
+}
+
+
+fn file_list_from_iter_str(items: impl IntoIterator<Item=impl AsRef<str>>) -> HashSet<File>
 {
     items
         .into_iter()
-        .map(|s| File::from_str(s).unwrap())
+        .map(|s| File::from_str(s.as_ref()).unwrap())
         .collect()
 }
 
@@ -56,45 +63,39 @@ where
 }
 
 pub fn criterion_benchmark_add(c: &mut Criterion) {
-    let files = file_list_from_iter_str([
-        "/etc/fine/shoes/make.txt",
-        "/etc/fine/shoes/blue.png",
-        "/mnt/partition/fourteen.one",
-    ]);
+    let file_names = load_file_names("test_files2.yml").unwrap();
+    let files = file_list_from_iter_str(file_names.into_iter());
 
     c.bench_function("naive_add_files", |b| {
-        b.iter(|| add_files_to_db(black_box(&mut NaiveDBFS::new()), black_box(files.clone())))
+        b.iter(|| assert_eq!(Some(()), add_files_to_db(black_box(&mut NaiveDBFS::new()), black_box(files.clone()))))
     });
 
     c.bench_function("hashtags_add_files", |b| {
         b.iter(|| {
-            add_files_to_db(
+            assert_eq!(Some(()), add_files_to_db(
                 black_box(&mut HashTagsDBFS::new()),
                 black_box(files.clone()),
-            )
+            ))
         })
     });
 
     c.bench_function("hashtags2_add_files", |b| {
         b.iter(|| {
-            add_files_to_db(
+            assert_eq!(Some(()), add_files_to_db(
                 black_box(&mut HashTags2DBFS::new()),
                 black_box(files.clone()),
-            )
+            ))
         })
     });
 
     c.bench_function("tagtree_add_files", |b| {
-        b.iter(|| add_files_to_db(black_box(&mut TagTreeDBFS::new()), black_box(files.clone())))
+        b.iter(|| assert_eq!(Some(()), add_files_to_db(black_box(&mut TagTreeDBFS::new()), black_box(files.clone()))))
     });
 }
 
 pub fn criterion_benchmark_search(c: &mut Criterion) {
-    let files = file_list_from_iter_str([
-        "/etc/fine/shoes/make.txt",
-        "/etc/fine/shoes/blue.png",
-        "/mnt/partition/fourteen.one",
-    ]);
+    let file_names = load_file_names("test_files2.yml").unwrap();
+    let files = file_list_from_iter_str(file_names.into_iter());
 
     let mut naive = NaiveDBFS::new();
     add_files_to_db(&mut naive, files.clone());
@@ -108,7 +109,7 @@ pub fn criterion_benchmark_search(c: &mut Criterion) {
     let mut tagtree = TagTreeDBFS::new();
     add_files_to_db(&mut tagtree, files.clone());
 
-    let queries = query_list_from_iter_str(["/fine/etc/shoes", "/mnt/patition"]);
+    let queries = query_list_from_iter_str(["/home/luke/.cache", "/home/luke/Downloads"]);
 
     c.bench_function("naive_get_files", |b| {
         b.iter(|| query_files_in_db(black_box(&naive), black_box(queries.clone())))
